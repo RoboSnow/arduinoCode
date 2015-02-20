@@ -24,11 +24,12 @@ byte mac[] = {
 int serverPort  = 8000; //TouchOSC (incoming port)
 int destPort = 9000;    //TouchOSC (outgoing port)
 
-int rightMotorPin =  3;       //pin 13 on Arduino Uno. Pin 6 on a Teensy++2
-int leftMotorPin =  5;       //pin 13 on Arduino Uno. Pin 6 on a Teensy++2
+int rightMotorPin =  3;       
+int leftMotorPin =  5;       
 
-int plowPin = 6;       //pin 13 on Arduino Uno. Pin 6 on a Teensy++2
-int lxPin = 9;       //pin 13 on Arduino Uno. Pin 6 on a Teensy++2
+int plowPinUp = 9;       
+int plowPinDwn = 6;
+int lxPin = 11;       
 
 int rightMotorState = LOW;
 int leftMotorState = LOW;
@@ -48,7 +49,7 @@ void setup(){
   pinMode(leftMotorPin,OUTPUT);
   pinMode(lxPin,OUTPUT);
   
-  Serial.begin(9600); //9600 for a "normal" Arduino board (Uno for example). 115200 for a Teensy ++2 
+  Serial.begin(9600); //9600 for a "normal" Arduino board (Uno for example)
   Serial.println("Yukita Alpha");
 
   // start the Ethernet connection:
@@ -92,11 +93,11 @@ void OSCMsgReceive(){
     while(size--)
       msgIN.fill(Udp.read());
     if(!msgIN.hasError()){
-      msgIN.route("/Controls/plowUp",plowUp);
-      msgIN.route)"Controld/plowDwn",plowDwn);
-      msgIN.route("/Controls/rightMotor",rightMotorCode);
-      msgIN.route("/Controls/leftMotor",leftMotorCode);
-      msgIN.route("/Controls/lights",lxCode);
+      msgIN.route("/Controls/plowUp",plowUp); //if plowUp is toggled go to the plowUp code
+      msgIN.route)"Controld/plowDwn",plowDwn); //if plowDwn is toggled go to the plowDwn code
+      msgIN.route("/Controls/rightMotor",rightMotorCode); //if rightMotor is toggled go to the rightMotor code
+      msgIN.route("/Controls/leftMotor",leftMotorCode); //if leftMotor is toggled go to the leftMotor code
+      msgIN.route("/Controls/lights",lxCode); //if lights are toggled go to the lighting code
     }
   }
 }
@@ -105,7 +106,7 @@ void plowUp(OSCMessage &msg, int addrOffset){
   plowState = (boolean) msg.getFloat(0);
   OSCMessage msgOUT("/Controls/plowUp");
 
-  digitalWrite(plowPin, plowState);
+  digitalWrite(plowPinUp, plowState);
 
   msgOUT.add(plowState);
   if (plowState) {
@@ -131,7 +132,7 @@ void plowDwn(OSCMessage &msg, int addrOffset){
   plowState = (boolean) msg.getFloat(0);
   OSCMessage msgOUT("/Controls/plowDwn");
 
-  digitalWrite(plowPin, plowState);
+  digitalWrite(plowPinDwn, plowState);
 
   msgOUT.add(plowState);
   if (plowState) {
