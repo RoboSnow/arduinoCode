@@ -1,4 +1,4 @@
-# 雪他 (Yukita) Arduino Code V0.1.0
+# 雪他 (Yukita) Arduino Code V0.2.0
 ## Notes:
 - In this version we rewrote the code to be more realistic to what we would need to drive Yukita. We added code to control lights, left and right hdraulic motors, and control the plow.
     - The plow code is theoratical at this point because we are unsure of how it is going to work.
@@ -12,7 +12,7 @@
 - LED for the simulation of lights
 - LED for the simulation of the plow
 
-## Software:
+## Software: 
 - Arduino IDE
 - TouchOSC app (other OSC apps may work, but the layout provided is in TouchOSC format)
 - [TouchOSC Editor](http://hexler.net/software/touchosc)
