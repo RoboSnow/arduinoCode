@@ -1,8 +1,9 @@
 # 雪他 (Yukita) Arduino Code V0.2.0
 ## Notes:
-- In this version we rewrote the code to be more realistic to what we would need to drive Yukita. We added code to control lights, left and right hdraulic motors, and control the plow.
-    - The plow code is theoratical at this point because we are unsure of how it is going to work.
-- The circuit diagram provided is in the [Fritzing](http://fritzing.org/home/) format; a .png version is also provided.
+- In this version we added ip address and code version sending. As well as a time and controller battery meter. 
+- Plow code was changed from "plowUp & plowDwn" to "plowCode" 
+	- This was done just to try out a different code and idea. Just as V0.2.0, this code is not tied to any actual idea or theory for Yukita.
+
 
 ## Hardware:
 - Router
