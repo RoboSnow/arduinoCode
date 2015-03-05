@@ -1,7 +1,8 @@
 /*
 Changes:
-Added coding for plow, lights, and motor control
-Removed the old template code from V1
+IP address is sent over OSC to the control device
+Software version number is sent over OSC to the device
+plowUp and plowDwn code changed to plowCode
 */
 
 #include <SPI.h>
@@ -20,16 +21,20 @@ byte mac[] = {
 //Variables
 //{
   
-
+const long interval = 1000;
+unsigned long previousMillis = 0;
+const long interval1 = 1000;
+unsigned long previousMillis1 = 0;
+char ip[12] = "192.168.0.3";
+char version[9] = "0.0.3";
 int serverPort  = 8000; //TouchOSC (incoming port)
 int destPort = 9000;    //TouchOSC (outgoing port)
 
 int rightMotorPin =  3;       
 int leftMotorPin =  5;       
 
-int plowPinUp = 9;       
-int plowPinDwn = 6;
-int lxPin = 11;       
+int plowPin = 6;       
+int lxPin = 9;       
 
 int rightMotorState = LOW;
 int leftMotorState = LOW;
@@ -49,7 +54,7 @@ void setup(){
   pinMode(leftMotorPin,OUTPUT);
   pinMode(lxPin,OUTPUT);
   
-  Serial.begin(9600); //9600 for a "normal" Arduino board (Uno for example)
+  Serial.begin(9600); //9600 for a "normal" Arduino board (Uno for example). 115200 for a Teensy ++2 
   Serial.println("Yukita Alpha");
 
   // start the Ethernet connection:
@@ -81,9 +86,60 @@ void setup(){
 
 void loop(){
   //process received messages
+  unsigned long currentMillis1 = millis();
+  if(currentMillis1 - previousMillis1 >= interval1) {
+    previousMillis1 = currentMillis1;   
+    
+    
+    const char version[9] = "0.0.3";
+    
+    
+    OSCMessage versionmsgOUT("/Yukita/Version");
+    
+    versionmsgOUT.add(version);
+    
+    
+    Udp.beginPacket(Udp.remoteIP(), destPort);
+    
+    versionmsgOUT.send(Udp);
+    
+    
+    Udp.endPacket(); // mark the end of the OSC Packet
+    
+    versionmsgOUT.empty();
+    
+  }
+  ipAddressSend();
   OSCMsgReceive();
 }
 
+void ipAddressSend(){
+    
+
+ unsigned long currentMillis = millis();
+ 
+  if(currentMillis - previousMillis >= interval) {
+    previousMillis = currentMillis;   
+    
+    const char ip[12] = "192.168.0.3";
+    
+    
+    OSCMessage ipmsgOUT("/Yukita/ipAddress");
+    
+    
+    ipmsgOUT.add(ip);
+    
+    Udp.beginPacket(Udp.remoteIP(), destPort);
+    
+    ipmsgOUT.send(Udp); // send the bytes
+    
+    Udp.endPacket(); // mark the end of the OSC Packet
+    
+    ipmsgOUT.empty(); // free space occupied by message
+  }
+    
+  
+}
 
 void OSCMsgReceive(){
 
@@ -93,67 +149,39 @@ void OSCMsgReceive(){
     while(size--)
       msgIN.fill(Udp.read());
     if(!msgIN.hasError()){
-      msgIN.route("/Controls/plowUp",plowUp); //if plowUp is toggled go to the plowUp code
-      msgIN.route)"Controld/plowDwn",plowDwn); //if plowDwn is toggled go to the plowDwn code
-      msgIN.route("/Controls/rightMotor",rightMotorCode); //if rightMotor is toggled go to the rightMotor code
-      msgIN.route("/Controls/leftMotor",leftMotorCode); //if leftMotor is toggled go to the leftMotor code
-      msgIN.route("/Controls/lights",lxCode); //if lights are toggled go to the lighting code
+      msgIN.route("/Controls/plowUp",plowCode);
+      msgIN.route("/Controls/rightMotor",rightMotorCode);
+      msgIN.route("/Controls/leftMotor",leftMotorCode);
+      msgIN.route("/Controls/lights",lxCode);
     }
   }
 }
 
-void plowUp(OSCMessage &msg, int addrOffset){
+void plowCode(OSCMessage &msg, int addrOffset){
   plowState = (boolean) msg.getFloat(0);
   OSCMessage msgOUT("/Controls/plowUp");
 
-  digitalWrite(plowPinUp, plowState);
+  digitalWrite(plowPin, plowState);
 
   msgOUT.add(plowState);
   if (plowState) {
-    Serial.println("PlowUp State on");
+    Serial.println("Plow State on");
   }
   else {
-    Serial.println("PlowUp State off");
+    Serial.println("Plow State off");
   }
 
-  plowState = !plowState;		 // toggle the state from HIGH to LOW to HIGH to LOW ...
+  plowState = !plowState;		 
 
   
-  //send osc message back to controll object in TouchOSC
+  //send osc message back to control object in TouchOSC
   //Local feedback is turned off in the TouchOSC interface.
-  //The button is turned on in TouchOSC interface whe the conrol receives this message.
+  //The button is turned on in TouchOSC interface when the control receives this message.
   Udp.beginPacket(Udp.remoteIP(), destPort);
   msgOUT.send(Udp); // send the bytes
   Udp.endPacket(); // mark the end of the OSC Packet
   msgOUT.empty(); // free space occupied by message
 }
-
-void plowDwn(OSCMessage &msg, int addrOffset){
-  plowState = (boolean) msg.getFloat(0);
-  OSCMessage msgOUT("/Controls/plowDwn");
-
-  digitalWrite(plowPinDwn, plowState);
-
-  msgOUT.add(plowState);
-  if (plowState) {
-    Serial.println("PlowDwn State on");
-  }
-  else {
-    Serial.println("PlowDwn State off");
-  }
-
-  plowState = !plowState;		 // toggle the state from HIGH to LOW to HIGH to LOW ...
-
-  
-  //send osc message back to controll object in TouchOSC
-  //Local feedback is turned off in the TouchOSC interface.
-  //The button is turned on in TouchOSC interface whe the conrol receives this message.
-  Udp.beginPacket(Udp.remoteIP(), destPort);
-  msgOUT.send(Udp); // send the bytes
-  Udp.endPacket(); // mark the end of the OSC Packet
-  msgOUT.empty(); // free space occupied by message
-}
-
 void rightMotorCode(OSCMessage &msg, int addrOffset){
   rightMotorState = (boolean) msg.getFloat(0);
   OSCMessage msgOUT("/Controls/rightMotor");
@@ -168,11 +196,11 @@ void rightMotorCode(OSCMessage &msg, int addrOffset){
     Serial.println("Right Motor off");
   }
 
-  rightMotorState = !rightMotorState;		 // toggle the state from HIGH to LOW to HIGH to LOW ...
+  rightMotorState = !rightMotorState;		 
 
-  //send osc message back to controll object in TouchOSC
+  //send osc message back to control object in TouchOSC
   //Local feedback is turned off in the TouchOSC interface.
-  //The button is turned on in TouchOSC interface whe the conrol receives this message.
+  //The button is turned on in TouchOSC interface whe  the control receives this message.
   Udp.beginPacket(Udp.remoteIP(), destPort);
   msgOUT.send(Udp); // send the bytes
   Udp.endPacket(); // mark the end of the OSC Packet
@@ -192,11 +220,11 @@ void leftMotorCode(OSCMessage &msg, int addrOffset){
     Serial.println("Left Motor off");
   }
 
-  leftMotorState = !leftMotorState;		 // toggle the state from HIGH to LOW to HIGH to LOW ...
+  leftMotorState = !leftMotorState;		 
 
-  //send osc message back to controll object in TouchOSC
+  //send osc message back to control object in TouchOSC
   //Local feedback is turned off in the TouchOSC interface.
-  //The button is turned on in TouchOSC interface whe the conrol receives this message.
+  //The button is turned on in TouchOSC interface when the control receives this message.
   Udp.beginPacket(Udp.remoteIP(), destPort);
   msgOUT.send(Udp); // send the bytes
   Udp.endPacket(); // mark the end of the OSC Packet
@@ -216,12 +244,12 @@ else {
   Serial.println("Lights off");
 }
 
-lxState = !lxState;		 // toggle the state from HIGH to LOW to HIGH to LOW ...
+lxState = !lxState;		 
 
 
-//send osc message back to controll object in TouchOSC
+//send osc message back to control object in TouchOSC
 //Local feedback is turned off in the TouchOSC interface.
-//The button is turned on in TouchOSC interface whe the conrol receives this message.
+//The button is turned on in TouchOSC interface when the control receives this message.
 Udp.beginPacket(Udp.remoteIP(), destPort);
 msgOUT.send(Udp); // send the bytes
 Udp.endPacket(); // mark the end of the OSC Packet
