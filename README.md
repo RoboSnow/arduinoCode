@@ -1,9 +1,7 @@
-# 雪他 (Yukita) Arduino Code V0.2.0
+# 雪他 (Yukita) Arduino Code V0.3.0
 ## Notes:
-- In this version we added ip address and code version sending. As well as a time and controller battery meter. 
-- Plow code was changed from "plowUp & plowDwn" to "plowCode" 
-	- This was done just to try out a different code and idea. Just as V0.2.0, this code is not tied to any actual idea or theory for Yukita.
-
+- In this version we adjusted the code to constanly send the ip address and the version of code to TouchOSC so that the rx light (red) would flash letting the user know it was connected.
+- The plowcodding was changed to just one section of code; this was done just to discover different ways to move the plow. At this point we do not have a working plow idea. 
 
 ## Hardware:
 - Router
@@ -15,7 +13,7 @@
 
 ## Software: 
 - Arduino IDE
-- TouchOSC app (other OSC apps may work, but the layout provided is in TouchOSC format)
+- TouchOSC app (other OSC apps may work, but the layout provided is in TouchOSC format and we only test using TouchOSC)
 - [TouchOSC Editor](http://hexler.net/software/touchosc)
 
 ## Installation:
@@ -29,17 +27,21 @@ After uploading the code to your arduino and the layout to the app:
     - All controls are toggle buttons
     - forward = both motor toggles pressed (both motor LEDs on)
     - turn = only the right or left motor toggle pressed (only one motor LED on)
-- Lights turn on and off via the "light" toggle (lights LEDs on or off)
-- Plow toggle turns plow LEDs on or off (plow LEDs on or off)
+    - Lights turn on and off via the "light" toggle (lights LEDs on or off)
+    - Plow toggle turns plow LEDs on or off (plow LEDs on or off)
+- The Yukita page provides information about Yukita.
+    -    IP address is synced via code to the controller device as well as the code version
+    -    Curret time can be found on the same page
+    -    current battery life of controller can also be found
 
 ## Manifest:
-Incompassing files
-- Arduino2.touchosc
+Incompassing files:
+- Arduino3.touchosc
     - TouchOSC Layout
-- ArduinoOSC_Test2.ino
+- ArduinoOSC_Test3.ino
     - The Arduino code
-- Yukita_Diagram_V0.2.0.png
-- Yukita_Diagram_V0.2.0.fzz
+- Yukita_Diagram_V0.3.0.png
+- Yukita_Diagram_V0.3.0.fzz
 - COPYING.md
     - Licensing file
 - README.md
@@ -54,8 +56,5 @@ Incompassing files
 - Also see [trippylighting's blog](http://trippylighting.com/teensy-arduino-ect/touchosc-and-arduino-oscuino/) for more information regaurding OSCuino
 
 ## ChangeLog:
-- Added motor control 
-- Added lighting control
-- Added plow control*
-    -  Code works, but we did not relate this to an actual design
+- Continuous sync of ip address and code vversion to controller
 
